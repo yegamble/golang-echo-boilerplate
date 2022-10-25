@@ -1,7 +1,7 @@
 version: '3.7'
 services:
-  echo_app:
-    container_name: echo_demo
+  echo_api:
+    container_name: api
     build: .
     ports:
       - ${EXPOSE_PORT}:${PORT}
@@ -18,11 +18,11 @@ services:
       - WAIT_BEFORE_HOSTS=15
       - WAIT_SLEEP_INTERVAL=3
     networks:
-      - echo-demo-stack
+      - datalayer
 
   echo_mysql:
-    image: mysql:5.7
-    container_name: echo_db
+    image: mariadb:10.5.8
+    container_name: echo_mysql
     ports:
       - ${EXPOSE_DB_PORT}:${DB_PORT}
     environment:
@@ -34,11 +34,21 @@ services:
     volumes:
       - database_mysql:/var/lib/mysql
     networks:
-      - echo-demo-stack
+      - datalayer
+
+  echo_redis:
+    image: redis
+    platform: linux/x86_64
+    container_name: ${REDIS_HOST}
+    restart: unless-stopped
+    ports:
+      - ${REDIS_EXPOSE_PORT}:${REDIS_PORT}
+    networks:
+      - datalayer
 
 volumes:
   database_mysql:
 
 networks:
-  echo-demo-stack:
+  datalayer:
     driver: bridge
